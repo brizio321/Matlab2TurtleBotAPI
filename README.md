@@ -34,11 +34,11 @@ Sensors and actuators can be interpreted as *optional* components of your Turtle
 
 Implements a schematic of what Turtlebot has to do extending *TurtlebotImpl* hierarchy.
 Abstract class *TurtlebotImpl* is designed to manage all the communications over the ROS network. The only thing you have to do is extend the class and implements **five** abstract methods. Those are:  
-- ^^loop:^^ returns a boolean value to determine if continue execution or not  
-- ^^sense:^^ retrieve all information you need from ROS network  
-- ^^process:^^ work on retrieved values, do your stuff  
-- ^^control:^^ send commands to the Turtlebot  
-- ^^visualize:^^ if needed, plot data  
+- *loop*: returns a boolean value to determine if continue execution or not  
+- *sense:* retrieve all information you need from ROS network  
+- *process:* work on retrieved values, do your stuff  
+- *control:* send commands to the Turtlebot  
+- *visualize:* if needed, plot data  
 Eventually, you can also reimplement *startConnection* and *closeConnection* methods as reported in *Template* script. Use them to execute actions before entering in control loop and just out from it.
 <img src="https://user-images.githubusercontent.com/101990157/204527433-29025f4f-1ae9-437e-a61f-368e3ace48c9.jpg" width="200">
   
