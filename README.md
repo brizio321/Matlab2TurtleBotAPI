@@ -23,24 +23,24 @@ All these three aspects are concretized in some class or class hierarchy.
 ---
 
 Turtlebot's model -> *Turtlebot3* hierarchy.
-![APIv1_3 - Turtlebot Abstraction](https://user-images.githubusercontent.com/101990157/204527367-8f761769-d0d2-4662-84aa-c76658c5baf3.jpg)
 Those classes are abstractions of what is a Turtlebot to Matlab: an *ip address* to which send some commands (*implementation* attributes) at a certain *rate*.  
-  
+<img src="https://user-images.githubusercontent.com/101990157/204527367-8f761769-d0d2-4662-84aa-c76658c5baf3.jpg" width="400">
+
 ---
 
 Sensors and actuators can be interpreted as *optional* components of your Turtlebot. They are useful to implement some actions, unnecessary for others. So, it seams fair to enable them or not during the execution of the scripts. Using *ConfigureOptions* object you'll be able to choose which Turtlebot's component (and ROS Topics) can be used to perform the target action.  Do you wanna have access to all Topics or just Topics created from a particular ROS Node? Get a predefined set of options from *ConfiguredOptions* class.  
   
 ---
 
-Implements a schematic of what Turtlebot has to do extending *TurtlebotImpl* hierarchy.  
-![APIv1_3 - Turtlebot Implementation](https://user-images.githubusercontent.com/101990157/204527433-29025f4f-1ae9-437e-a61f-368e3ace48c9.jpg)
+Implements a schematic of what Turtlebot has to do extending *TurtlebotImpl* hierarchy.
 Abstract class *TurtlebotImpl* is designed to manage all the communications over the ROS network. The only thing you have to do is extend the class and implements **five** abstract methods. Those are:  
 - ^^loop:^^ returns a boolean value to determine if continue execution or not  
 - ^^sense:^^ retrieve all information you need from ROS network  
 - ^^process:^^ work on retrieved values, do your stuff  
 - ^^control:^^ send commands to the Turtlebot  
 - ^^visualize:^^ if needed, plot data  
-Eventually, you can also reimplement *startConnection* and *closeConnection* methods as reported in *Template* script. Use them to execute actions before entering in control loop and just out from it.  
+Eventually, you can also reimplement *startConnection* and *closeConnection* methods as reported in *Template* script. Use them to execute actions before entering in control loop and just out from it.
+<img src="https://user-images.githubusercontent.com/101990157/204527433-29025f4f-1ae9-437e-a61f-368e3ace48c9.jpg" width="200">
   
 ### A more technical review  
 *Currently writing it, come back in few days*  
