@@ -83,6 +83,12 @@ In a new launch script, say *ReadScanLaunch.m*, select the desired *options* to 
 Create a new Turtlebot3 object using one of the concrete classes providing ip address, loop rate and options. Invoke *perform* to start execution.  
  
 ```
+    co = ConfigureOptions();
+    co = co.enableScan();
+    options = co.getOptions();
+    %Equivalent to
+    %options = ConfiguredOptions.lds();
+
     tb = TBBurger("192.168.1.11", 4, ReadScan(options));
     tb.perform();
 ```
