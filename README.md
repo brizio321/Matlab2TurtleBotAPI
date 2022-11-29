@@ -22,8 +22,8 @@ All these three aspects are concretized in some class or class hierarchy.
   
 ---
 
-Turtlebot's model -> *Turtlebot3* hierarchy.  
-![Turtlebot3 abstraction hierarchy](C:\Users\fabri\OneDrive - Università della Calabria\Tesi\Figure\APIv1_3 - Turtlebot Abstraction.jpg)  
+Turtlebot's model -> *Turtlebot3* hierarchy.
+![APIv1_3 - Turtlebot Abstraction](https://user-images.githubusercontent.com/101990157/204527367-8f761769-d0d2-4662-84aa-c76658c5baf3.jpg)
 Those classes are abstractions of what is a Turtlebot to Matlab: an *ip address* to which send some commands (*implementation* attributes) at a certain *rate*.  
   
 ---
@@ -33,7 +33,7 @@ Sensors and actuators can be interpreted as *optional* components of your Turtle
 ---
 
 Implements a schematic of what Turtlebot has to do extending *TurtlebotImpl* hierarchy.  
-![Turtlebot3 implementation hierarchy](C:\Users\fabri\OneDrive - Università della Calabria\Tesi\Figure\APIv1_3 - Turtlebot Implementation.jpg)  
+![APIv1_3 - Turtlebot Implementation](https://user-images.githubusercontent.com/101990157/204527433-29025f4f-1ae9-437e-a61f-368e3ace48c9.jpg)
 Abstract class *TurtlebotImpl* is designed to manage all the communications over the ROS network. The only thing you have to do is extend the class and implements **five** abstract methods. Those are:  
 - ^^loop:^^ returns a boolean value to determine if continue execution or not  
 - ^^sense:^^ retrieve all information you need from ROS network  
@@ -88,7 +88,11 @@ Create a new Turtlebot3 object using one of the concrete classes providing ip ad
 ```
 
 Find this example in source code. Follow a video of a simulation.  
-![Reading LDS values](C:\Users\fabri\Videos\2022-11-29 00-17-08.mkv)  
+
+
+https://user-images.githubusercontent.com/101990157/204527481-b2461b40-a167-45d0-9732-f61376031946.mp4
+
+
 
 ### TurnAndGo  
 *Already included in source code, soon also a description of this example. It's more rich than ReadScan*  
