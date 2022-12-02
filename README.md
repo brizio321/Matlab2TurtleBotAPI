@@ -1,6 +1,6 @@
 # matlab_to_turtlebot_interface
- A simple and general purpose software interface to control a Turtlebot3 from Matlab
- **Need ROS Toolbox to run.**
+A simple and general purpose software interface to control a Turtlebot3 from Matlab
+**Need ROS Toolbox to run.**
 
 ## Roadmap
 What I'd like to do to update this repo.
@@ -9,6 +9,7 @@ What I'd like to do to update this repo.
 - [ ] Add few methods, for WafflePi model, to deal with camera images.
 - [ ] Write a more technical description.
 - [ ] If useful, write a brief documentation for every utility class.
+
 Roadmap list updated on 02/12/2022.
 
 ## Aim of scripts  
