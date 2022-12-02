@@ -1,5 +1,15 @@
 # matlab_to_turtlebot_interface
  A simple and general purpose software interface to control a Turtlebot3 from Matlab
+ **Need ROS Toolbox to run.**
+
+## Roadmap
+What I'd like to do to update this repo.
+- [ ] Describe, at least, another example to better understand how to use this set of classes.
+- [ ] Add WafflePi class to concretize in code also Turtlebot3 model WafflePi.
+- [ ] Add few methods, for WafflePi model, to deal with camera images.
+- [ ] Write a more technical description.
+- [ ] If useful, write a brief documentation for every utility class.
+Roadmap list updated on 02/12/2022.
 
 ## Aim of scripts  
 For personal developement, I needed an interface on Matlab to command a Turtlebot3 model Burger. After few research I found a great support from Matlab towards Turtlebot and, in general, ROS worlds: a lot of guides and tutorials are provided to get started with Turtlebots and ROS Toolbox.  
@@ -45,42 +55,117 @@ Eventually, you can also reimplement *startConnection* and *closeConnection* met
 ### A more technical review  
 *Currently writing it, come back in few days*  
 
-## Examples and how-to  
+## Examples and how-to
 ### Reading LDS values  
-A simple example to show how to put all the pieces together, building an application that (indefinitely) acquire LDS sensor's values and plot data.  
-First, derive from *TurtlebotImpl* a new class. Call it *ReadScan*. You can use *Template* file as starting point, changing step-by-step what needed.  
-`classdef ReadScan < TurtlebotImpl`  
-Since we'll only reimplement the five abstract methods from TurtlebotImpl, there's no way to change their signature to pass parameter. Hence, use *properties block* to create all support variable useful to pass data from one method to the other.  
+This wants to be a simple example to show how put all the pieces together. The goal is to write an application that (indefinitely) acquire LDS sensor's values and plot data.
+Starting from *Template* file and apply necessary changes would be a straightforward approach.
+First of all, starts from name: call the new file, and the class, *ReadScan*.
 
 ```
-    properties
+classdef ReadScan < TurtlebotImpl
+```
+
+Think a bit about what we need. The control loop is broke up in five times: 
+1. Check loop condition (**check()**)
+2. Acquire data (**sense()**)
+3. Process data (**process()**)
+4. Apply a control based on processing (**control()**)
+5. Eventually, plot data you need (**visualize()**)
+Retrieving and plotting data from LDS sensor can be achieved adjusting **sense()** and **visualize()** methods.
+Similarly, perform the action without time constraints is obtained modifying **check()** method.
+Hence, a new blueprint for *ReadScan* class is the following code.
+
+```
+properties
+    %What's here?
+end
+
+methods
+    function obj = Template(options)
+        obj = obj@TurtlebotImpl(options);
+    end
+end
+
+methods
+    function obj = startConnection(obj, ipaddress)
+        obj = startConnection@TurtlebotImpl(obj, ipaddress);
+        %NO NEED TO ADD ACTION HERE
+    end
+
+    function obj = closeConnection(obj)
+        %NO NEED TO ADD ACTION HERE
+        obj = closeConnection@TurtlebotImpl(obj);
+    end
+
+    function check = loop(obj)
+        %SAY IT'S GONNA BE FOREVER
+        check = true;
+    end
+
+    function obj = sense(obj)
+        %RETRIEVE DATA. Continue reading.
+    end
+
+    function obj = process(obj)
+        %NOTHING TO DO HERE
+    end
+
+    function obj = control(obj)
+        %NOTHING TO DO HERE
+    end
+
+    function obj = visualize(obj)
+        %PLOT DATA. Continue reading.
+    end
+end
+```
+
+Few things to do. With order:
+- Indefinitely running: done. :white_check_mark:
+- Read scan: TODO. :heavy_exclamation_mark:
+- Pass data from **sense()** to **visualize()**: TODO. :bangbang:
+- Plot scan: TODO, but easy. :heavy_exclamation_mark:
+
+About read values from /scan topic (read LDS measurements) I encourage you to check out ***Scan*** *utility class*.
+***Scan*** class combined with *read()* method inherited from superclass *TurtlebotImpl* provide different ways to read LDS data.
+For example choose to retrieve readings in polar or cartesian coordinates, or choose to enlarge readings of a certain distance or not.
+In this case, we'll read data in cartesian coordinates without enlargin it.
+
+```
+function obj = sense(obj)
+    [~, ~, obj.obs_x, obj.obs_y] = Scan.getCartesianScanData( read(obj, 'scan') );
+end
+```
+
+But what about pass LDS read distances from **sense()** to **visualize()**?
+Since *TurtlebotImpl* and derived classes have no ways to modify signature to invoke control-loop functions using different parameters, a solution is to use private properties class to store values from a method to the other.
+*ReadScan* example store data for obstacle positions and axes to plot scans.
+
+```
+properties
     ax
     obs_x
     obs_y
-    end
+end
 ```
 
-The actions performed are simply reading data and visualizing them, and these are repeated until user kill execution. So, we can just modify three of the five abstract methods: *loop*, sense* and *visualize*. The others can be left blank, or totally not reported in *ReadScan* class.  
+Finally, just plot memorized values.  
  
 ```
-    function check = loop(obj)
-    check = true;
-    end
-    
-    function obj = sense(obj)
-    [~, ~, obj.obs_x, obj.obs_y] = Scan.getCartesianScanData( read(obj, 'scan') );
-    end
-    
-    function obj = visualize(obj)
+function obj = visualize(obj)
     %Plot data. Eventually, use attributes to store axis.
-        plot(obj.ax, obj.obs_x, obj.obs_y, '.b');
-        xlim([-3, 3]);
-        ylim([-3, 3]);
-    end
+    plot(obj.ax, obj.obs_x, obj.obs_y, '.b');
+    xlim([-3, 3]);
+    ylim([-3, 3]);
+end
 ```
 
-In a new launch script, say *ReadScanLaunch.m*, select the desired *options* to be enabled. In this case, the preconfigured *lds* configuration (enable just /scan topic reading) will be fine.  
-Create a new Turtlebot3 object using one of the concrete classes providing ip address, loop rate and options. Invoke *perform* to start execution.  
+Create a script to launch the new implementation, say *ReadScanLaunch.m*.
+To create a new Turtlbot object:
+1. Build a set of options using *ConfigureOptions* objects or select a preconfiguration from *ConfiguredOptions* class. To just read scan, enabling /scan topic is sufficient. (*lds()* configuration if you use *ConfiguredOptions*).  
+2. Note Turtlebot's ip address
+3. Create a new Turtlebot3 object (use one of the concrete classes) providing ip address, loop rate and options.
+4. Invoke *perform* to start execution.  
  
 ```
     co = ConfigureOptions();
