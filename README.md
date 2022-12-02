@@ -72,6 +72,7 @@ Think a bit about what we need. The control loop is broke up in five times:
 3. Process data (**process()**)
 4. Apply a control based on processing (**control()**)
 5. Eventually, plot data you need (**visualize()**)
+
 Retrieving and plotting data from LDS sensor can be achieved adjusting **sense()** and **visualize()** methods.
 Similarly, perform the action without time constraints is obtained modifying **check()** method.
 Hence, a new blueprint for *ReadScan* class is the following code.
