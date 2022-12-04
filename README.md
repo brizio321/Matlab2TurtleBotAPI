@@ -4,13 +4,13 @@ A simple and general purpose software interface to control a Turtlebot3 from Mat
 
 ## Roadmap
 What I'd like to do to update this repo.
-- [ ] Describe, at least, another example to better understand how to use this set of classes.
+- [x] Describe, at least, another example to better understand how to use this set of classes.
 - [ ] Add WafflePi class to concretize in code also Turtlebot3 model WafflePi.
 - [ ] Add few methods, for WafflePi model, to deal with camera images.
 - [ ] Write a more technical description.
 - [ ] If useful, write a brief documentation for every utility class.
 
-Roadmap list updated on 02/12/2022.
+Roadmap list updated on 04/12/2022.
 
 ## Aim of scripts  
 For personal developement, I needed an interface on Matlab to command a Turtlebot3 model Burger. After few research I found a great support from Matlab towards Turtlebot and, in general, ROS worlds: a lot of guides and tutorials are provided to get started with Turtlebots and ROS Toolbox.  
@@ -58,7 +58,7 @@ Eventually, you can also reimplement *startConnection* and *closeConnection* met
 
 ## Examples and how-to
 ### Reading LDS values  
-This wants to be a simple example to show how put all the pieces together. The goal is to write an application that (indefinitely) acquire LDS sensor's values and plot data.
+This is a simple example to show how put all the pieces together. The goal is to write an application that (indefinitely) acquire LDS sensor's values and plot data.
 Starting from *Template* file and apply necessary changes would be a straightforward approach.
 First of all, starts from name: call the new file, and the class, *ReadScan*.
 
@@ -168,16 +168,16 @@ To create a new Turtlbot object:
 2. Note Turtlebot's ip address
 3. Create a new Turtlebot3 object (use one of the concrete classes) providing ip address, loop rate and options.
 4. Invoke *perform* to start execution.  
- 
-```
-    co = ConfigureOptions();
-    co = co.enableScan();
-    options = co.getOptions();
-    %Equivalent to
-    %options = ConfiguredOptions.lds();
 
-    tb = TBBurger("192.168.1.11", 4, ReadScan(options));
-    tb.perform();
+```
+co = ConfigureOptions();
+co = co.enableScan();
+options = co.getOptions();
+%Equivalent to
+%options = ConfiguredOptions.lds();
+
+tb = TBBurger("192.168.1.11", 4, ReadScan(options));
+tb.perform();
 ```
 
 Find this example in source code. Follow a video of a simulation.  
@@ -188,4 +188,120 @@ https://user-images.githubusercontent.com/101990157/204527481-b2461b40-a167-45d0
 
 
 ### TurnAndGo  
-*Already included in source code, soon also a description of this example. It's more rich than ReadScan*  
+*TurnAndGo* implementation makes Turtlebot go on in its front direction until near obstacles are detected. An obstacle, for simplicity, is considered to be in front of the Turtlebot when obstacle's points are detected by LDS and, in a polar coordinate system, have alpha coordinate greater than -30° and smaller than 30°.
+When a new obstacle is detected, Turtlebot turn 45° left. If new front direction is free, it move on. Otherwise, it turns left of other 45° until a free direction is achieved.
+This time, let's set a time for the simulation: after a fixed time, program ends.
+As for *ReadScan* implementation, extend *TurtlebotImpl* class and work by difference.
+Let's wrote down what to do:
+1. Since simulation has a fixed time, we need to initialize a global timer and check for time expired on every iteration.
+2. Acquire LDS measurements.
+3. Process measurements: verify if distances measured for [-30°, 30°] angles are under distance treshold.
+4. Based on processing, set a linear speed if direction is free or an angular speed if Turtlebot have to turn.
+5. *Optional, not described in this comment, plot LDS measurement.*
+
+Class properties needed to pass data through control loop method are:
+- Two timers, one for global time and the other to complete the 45° rotation when obstacles are detecte. 
+- Two vectors, to store LDS measurements coordinates.
+- A boolean variable, to state when front direction is free.
+
+```
+properties
+    global_time
+    start_time
+
+    obstacles_dir %direction
+    obstacles_dis %distance
+    free_from_obstacles = false;
+end
+
+```
+
+Timer-based implementation are simply managed re-implementing **startConnection()** and **loop()** methods.
+```
+methods
+    function obj = startConnection(obj, ipaddress)
+        obj = startConnection@TurtlebotImpl(obj, ipaddress);
+        obj.global_time = tic;
+        obj.start_time = tic;
+    end
+
+    function obj = closeConnection(obj)
+        CommandVelocity.stop(obj);
+        obj = closeConnection@TurtlebotImpl(obj);
+    end
+    
+    function check = loop(obj)
+        check = toc(obj.global_time) < 45; %seconds
+    end %loop
+end
+```
+
+To acquire LDS scans in polar coordinates let's use *Scan* utility class methods.
+*Scan.getValidScanDataEnlarged* method extract from a message, published in /scan topic, only measures considered "reliable" (not negative and not out-of bound for sensor's range).
+Also, *Scan.getValidScanDataEnlarged* wants a second parameter (double) and reduce distances of a certain amount in order to enlarge the detected obstacle.
+```
+function obj = sense(obj)
+    [~, obj.obstacles_dir, ~, obj.obstacles_dis] = ...
+        ( obj.read('scan'), obj.model.tbot_circumscribing_radius );
+end %sense
+```
+
+Once read measurements from LDS, **process()** method test whether or not an obstacle is placed along Turtlebot's front direction. If Turtlebot is currently turning to change direction, the method does not modify this state.
+When a new obstacle is detected, start the timer used to perform the 45° rotation.
+```
+function obj = process(obj)
+    %If it's actually turning because of detected obstacle, keep
+    %turning.
+    if ~obj.free_from_obstacles
+        return;
+    end
+
+    %If it's moving forward or just turned left of 45°, check for
+    %obstacles.
+    obj.free_from_obstacles = true;
+    for i=1:numel(obj.obstacles_dir)
+        if obj.obstacles_dis(i) <= obj.model.tbot_circumscribing_radius && ...
+                (obj.obstacles_dir(i) >= deg2rad(330) || ...
+                obj.obstacles_dir(i) <= deg2rad(30) )
+            obj.free_from_obstacles = false;
+
+            %Obstacle detected: start timer to perform turning left
+            %trajectory.
+            obj.start_time = tic;
+            break;
+        end
+    end
+end %process
+```
+
+Finally, **control()** method follow what **process()** decided. If direction is free, set a linear speed to move on. If not, keep setting angular speed to perform the 45° rotation.
+```
+function obj = control(obj)
+    %Keep moving if forward direction is free from obstacles.
+    if obj.free_from_obstacles
+        v = 0.05; w = 0;
+    else
+        [v, w] = turn45Left( toc(obj.start_time) );
+        if abs(v) > 0
+        obj.free_from_obstacles = true;
+        v = 0; w = 0;
+        end
+    end
+
+    CommandVelocity.setSpeed( obj, v, w );
+end %control
+
+function [v, w] = turn45Left(delta_t)
+    if delta_t < (pi/4) / 0.25
+        v = 0; w = 0.25;
+    else
+        v = 0.05; w = 0;
+    end
+end
+```
+
+Note that *turn45Left(t)* method can be included as a private static method or wrote external to classdef.
+**Source code is comprehensive of visualization of LDS measurements.**
+
+
+

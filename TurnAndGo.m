@@ -1,6 +1,6 @@
 classdef TurnAndGo < TurtlebotImpl
     %TurnAndGo Move Turtlebot forward until new obstacle is detected. 
-    % Turn left 45° and check new direction is free from obstacles.
+    % Turn left 45° and check if new direction is free from obstacles.
     % Continue turning left untile a free direction is found. A direction
     % theta is defined "free" when the range [theta-30°; theta+30°] does
     % not contains obstacles at a distance shorter than 0.15[m].
@@ -11,9 +11,6 @@ classdef TurnAndGo < TurtlebotImpl
 
         tb_x
         tb_y
-
-        cruise_speed = 0;
-        angular_speed = 0;
 
         obstacles_dir %direction
         obstacles_dis %distance
