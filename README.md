@@ -303,5 +303,16 @@ end
 Note that *turn45Left(t)* method can be included as a private static method or wrote external to classdef.
 **Source code is comprehensive of visualization of LDS measurements.**
 
+Create a script to launch the new implementation.
+```
+co = ConfigureOptions();
+co = co.enableOdom();
+co = co.enableScan();
 
+co = co.enableCmdVel();
 
+options = co.getOptions();
+
+tb = TBBurger("192.168.1.11", 4, TurnAndGo(options));
+tb.perform();
+```
