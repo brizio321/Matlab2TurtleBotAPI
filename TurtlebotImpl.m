@@ -31,7 +31,7 @@ classdef (Abstract) TurtlebotImpl
 
             if any((obj.options == "reset"))
                 obj.publisher.Reset = ...
-                    rospublisher('/cmd_vel', 'DataFormat', 'struct');
+                    rospublisher('/reset', 'DataFormat', 'struct');
             end
         end
 
@@ -117,17 +117,10 @@ classdef (Abstract) TurtlebotImpl
                 error("Publihser not created for this topic.")
             end
 
-            try
-                msg = rosmessage(obj.publisher.MotorPower);
-                msg.Data = true;
-                send(obj.publisher.MotorPower, msg)
-            catch
-                obj = obj.startConnection();
-                msg = rosmessage(obj.publisher.MotorPower);
-                msg.Data = true;
-                send(obj.publisher.MotorPower, msg)
-                obj.closeConnection();
-            end
+            msg = rosmessage(obj.publisher.MotorPower);
+            msg.Data = true;
+            send(obj.publisher.MotorPower, msg)
+            disp("Motors powered on.")
         end
 
         function motorPowerOff(obj)
@@ -136,17 +129,10 @@ classdef (Abstract) TurtlebotImpl
                 error("Publihser not created for this topic.")
             end
 
-            try
-                msg = rosmessage(obj.publisher.MotorPower);
-                msg.Data = false;
-                send(obj.publisher.MotorPower, msg)
-            catch
-                obj = obj.startConnection();
-                msg = rosmessage(obj.publisher.MotorPower);
-                msg.Data = false;
-                send(obj.publisher.MotorPower, msg)
-                obj.closeConnection();
-            end
+            msg = rosmessage(obj.publisher.MotorPower);
+            msg.Data = false;
+            send(obj.publisher.MotorPower, msg)
+            disp("Motors powered off.")
         end
 
         function reset(obj)
@@ -155,17 +141,9 @@ classdef (Abstract) TurtlebotImpl
                 error("Publihser not created for this topic.")
             end
 
-            try
-                msg = rosmessage(obj.publisher.Reset);
-                send(obj.publisher.Reset, msg)
-                disp("Resetting odometry...")
-            catch
-                obj = obj.startConnection();
-                msg = rosmessage(obj.publisher.Reset);
-                send(obj.publisher.Reset, msg)
-                disp("Resetting odometry...")
-                obj.closeConnection();
-            end
+            msg = rosmessage(obj.publisher.Reset);
+            send(obj.publisher.Reset, msg)
+            disp("Resetting odometry...")
         end
 
     end

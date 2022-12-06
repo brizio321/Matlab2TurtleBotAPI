@@ -72,17 +72,35 @@ classdef (Abstract) Turtlebot3
 
         function motorPowerOn(obj)
             %motorPowerOn Switch on Turtlebot's motors.
-            obj.implementation.motorPowerOn();
+            try
+                obj.implementation.motorPowerOn();
+            catch
+                obj.implementation = obj.implementation.startConnection(obj.ipaddress);
+                obj.implementation.motorPowerOn();
+                obj.implementation.closeConnection();
+            end
         end
 
         function motorPowerOff(obj)
             %motorPowerOff Switch off Turtlebot's motors.
-            obj.implementation.motorPowerOff();
+            try
+                obj.implementation.motorPowerOff();
+            catch
+                obj.implementation = obj.implementation.startConnection(obj.ipaddress);
+                obj.implementation.motorPowerOff();
+                obj.implementation.closeConnection();
+            end
         end
 
         function reset(obj)
             %reset Reset Odometry and IMU data.
-            obj.implementation.reset();
+            try
+                obj.implementation.reset();
+            catch
+                obj.implementation = obj.implementation.startConnection(obj.ipaddress);
+                obj.implementation.reset();
+                obj.implementation.closeConnection();
+            end
         end
 
     end
