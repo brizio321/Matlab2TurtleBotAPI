@@ -59,7 +59,7 @@ classdef (Abstract) Turtlebot3
     % Publish methods
     methods(Sealed)
 
-        function publishCmdVel(obj, v, w)
+        function setLinearAngularSpeed(obj, v, w)
             %publishCmdVel Set Turtlebot speed.
             %   Input parameter 'v' is used as Linear Speed in X-direction,
             %   'w' as Angular Speed along Z-direction.
@@ -67,7 +67,23 @@ classdef (Abstract) Turtlebot3
             %   LIMITS. Model-specific subclasses state speed limits.
             %   If values exceed the limits, they will be saturated to the
             %   maximum.
-            obj.implementation.publishCmdVel(v, w);
+            obj.implementation.setLinearAngularSpeed(v, w);
+        end
+
+        function setDifferentialDriveSpeed(obj, wr, wl)
+            %setDifferentialDriveSpeed Use Differential Drive Model to set speed.
+            %   Input parameters 'wr' and 'wl' must be expressed in
+            %   [rad/s]; converted in Linear and Angular form, these must
+            %   not be greater than 0.22 [m/s] and 2.84 [rad/s].
+            %   Turtlebot3B publishing methods automatically saturate
+            %   excessive speeds.
+            obj.implementation.setDifferentialDriveSpeed(wr, wl);
+        end
+
+        function stop(obj)
+            %stop Stop turtlebot setting Linear and Angular speeds both 
+            %equals to zero.
+            obj.implementation.stop();
         end
 
         function motorPowerOn(obj)

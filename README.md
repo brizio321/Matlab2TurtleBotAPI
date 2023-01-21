@@ -288,7 +288,7 @@ function obj = control(obj)
         end
     end
 
-    CommandVelocity.setSpeed( obj, v, w );
+    obj.setLinearAngularSpeed( v, w );
 end %control
 
 function [v, w] = turn45Left(delta_t)

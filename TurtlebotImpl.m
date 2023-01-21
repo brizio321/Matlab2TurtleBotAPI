@@ -81,11 +81,30 @@ classdef (Abstract) TurtlebotImpl
 
     end
 
+    %Conversions
+    methods
+    
+        function [v, w] = speed2LinearAngularForm(obj, wr, wl)
+            %Convert right and left wheel speeds to
+            %linear and angular speeds.
+            speed = obj.model.diff2uni*[ wr; wl ];
+            v = speed(1); w = speed(2);
+        end
+
+        function [wr, wl] = speed2DifferentialDriveForm(obj, v, w)
+            %Convert linear and angular speeds to 
+            %right and left wheel speeds.
+            w = obj.model.uni2diff*[ v; w ];
+            wr = w(1); wl = w(2);
+        end
+
+    end
+
     % Publish methods
     methods(Sealed)
 
-        function publishCmdVel(obj, v, w)
-            %publishCmdVel Publish a new geometry_msgs/Twist in /cmd_vel
+        function setLinearAngularSpeed(obj, v, w)
+            %setLinearAngularSpeed Publish a new geometry_msgs/Twist in /cmd_vel
             %topic.
             %   Input parameter 'v' is used as Linear Speed in X-direction,
             %   'w' as Angular Speed along Z-direction.
@@ -109,6 +128,23 @@ classdef (Abstract) TurtlebotImpl
             msg.Linear.X = v;
             msg.Angular.Z = w;
             send( obj.publisher.CmdVel, msg );
+        end
+
+        function setDifferentialDriveSpeed(obj, wr, wl)
+            %setDifferentialDriveSpeed Use Differential Drive Model to set speed.
+            %   Input parameters 'wr' and 'wl' must be expressed in
+            %   [rad/s]; converted in Linear and Angular form, these must
+            %   not be greater than 0.22 [m/s] and 2.84 [rad/s].
+            %   Turtlebot3B publishing methods automatically saturate
+            %   excessive speeds.
+            [v, w] = obj.speed2LinearAngularForm(wr, wl);
+            obj.setLinearAngularSpeed(v, w);
+        end
+
+        function stop(obj)
+            %stop Stop turtlebot setting Linear and Angular speeds both 
+            %equals to zero.
+            obj.setLinearAngularSpeed0(0, 0);
         end
 
         function motorPowerOn(obj)

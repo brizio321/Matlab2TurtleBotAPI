@@ -95,7 +95,7 @@ classdef TurnAndGo < TurtlebotImpl
                 end
             end
 
-            CommandVelocity.setSpeed( obj, v, w );
+            obj.setLinearAngularSpeed( v, w );
         end %control
 
         function obj = visualize(obj)
