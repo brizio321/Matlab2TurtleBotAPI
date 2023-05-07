@@ -14,8 +14,8 @@ classdef(Sealed) Odometry
 
     methods(Static)
 
-        function [frame, pose, covariance] = getPoseEstimation(msg)
-            %getPoseEstimation Extract Turtlebot's pose estimation from a
+        function [frame, pose, covariance] = poseEstimation(msg)
+            %poseEstimation Extract Turtlebot's pose estimation from a
             %odometry message.
             %   Output value of the method are the coordinate frame used to
             %   express the pose, the estimated pose and the covariance
@@ -41,8 +41,8 @@ classdef(Sealed) Odometry
                             covArray(6,1), covArray(6,2), covArray(6,6) ];
         end
 
-        function [frame, speed, covariance] = getSpeedEstimation(msg)
-            %getSpeedEstimation Extract Turtlebot's speed estimation from 
+        function [frame, speed, covariance] = speedEstimation(msg)
+            %speedEstimation Extract Turtlebot's speed estimation from 
             %odometry message.
             %   Output value of the method are the coordinate frame used to
             %   express the speed, the estimated speed and the covariance

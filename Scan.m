@@ -19,15 +19,15 @@ classdef(Sealed) Scan
 
     methods(Static)
 
-        function [min_range, max_range] = getExtremeValues(msg)
-            %getExtremeValues Extract minimum and maximum measured 
+        function [min_range, max_range] = extremeValues(msg)
+            %extremeValues Extract minimum and maximum measured 
             %distances from a /scan message.
             %   Distances are measured in [m].
             min_range = msg.RangeMin; max_range = msg.RangeMax;
         end
 
-        function [frame, angles, times, ranges] = getScanData(msg)
-            %getScanData Extract detected points from a scan message and
+        function [frame, angles, times, ranges] = scanData(msg)
+            %scanData Extract detected points from a scan message and
             %return them in polar coordinates.
             %   All outputs, except frame, are column vectors of the same
             %   size: 360 elements.
@@ -48,16 +48,16 @@ classdef(Sealed) Scan
             ranges = reshape(msg.Ranges, numel(angles), 1);
         end
 
-        function [frame, angles, times, ranges] = getValidScanData(msg)
-            %getValidScanData Extract detected points from a scan message 
+        function [frame, angles, times, ranges] = validData(msg)
+            %validData Extract detected points from a scan message 
             %discarding out of bounds measurements. Points are returned in
             %polar coordinates.
             %   Return LIDAR measurements ignoring angles, times and ranges 
             %   entries where range value is not between minimum and 
             %   maximum distances specified by scan message. 
             %   Returns only "valuable" data.
-            [r_min ,r_max] = Scan.getExtremeValues(msg);
-            [frame, a, t, r] = Scan.getScanData(msg);
+            [r_min ,r_max] = Scan.extremeValues(msg);
+            [frame, a, t, r] = Scan.scanData(msg);
 
             angles = zeros(size(a));
             times = zeros(size(a));
@@ -78,19 +78,19 @@ classdef(Sealed) Scan
             ranges = ranges(1:ven);
         end
 
-        function [frame, angles, times, ranges] = getValidScanDataEnlarged(msg, radius)
-            %getValidScanDataEnlarged Extract detected points from a scan 
+        function [frame, angles, times, ranges] = validDataEnlarged(msg, radius)
+            %validDataEnlarged Extract detected points from a scan 
             %message discarding out of bounds measurements and reducing 
             %observed distances of 'radius'. Points are returned in
             %polar coordinates.
-            [r_min ,r_max] = Scan.getExtremeValues(msg);
-            [frame, a, t, r] = Scan.getScanData(msg);
+            [r_min ,r_max] = Scan.extremeValues(msg);
+            [frame, a, t, r] = Scan.scanData(msg);
 
             angles = zeros(size(a));
             times = zeros(size(a));
             ranges = zeros(size(a));
 
-            ven = 0; %ven -> valuable entry number
+            ven = 0; %ven -> valuable entries number
             for i=1:numel(r)
                 if r(i) >= r_min && r(i) <= r_max
                     ven = ven+1;
@@ -109,8 +109,8 @@ classdef(Sealed) Scan
             ranges = ranges(1:ven);
         end
 
-        function [frame, times, x, y] = getCartesianScanData(msg)
-            %getCartesianScanData Extract detected points from a scan 
+        function [frame, times, x, y] = cartesianScanData(msg)
+            %cartesianScanData Extract detected points from a scan 
             %message and return them in cartesian coordinates.
             %   Return LIDAR measurements only for valid points, where 
             %   range value is between minimum and maximum distances 
@@ -118,23 +118,16 @@ classdef(Sealed) Scan
             %   Times are in [seconds], distances in [m].
             %   Values of time starts from zero, so are relative to 
             %   current measurements.
-            [frame, angles, times, ranges] = Scan.getValidScanData(msg);
+            [frame, angles, times, ranges] = Scan.validData(msg);
             [x, y] = pol2cart(angles, ranges); 
         end
 
-        function [frame, times, x, y] = getCartesianScanEnlargingObstacles(msg, radius)
-            %getCartesianScanEnlargingObstacles Extract detected points 
+        function [frame, times, x, y] = cartesianValidDataEnlarged(msg, radius)
+            %cartesianValidDataEnlarged Extract detected points 
             %from a scan message and return them in cartesian coordinates,
             %reducing observed distances of 'radius'.
-            [frame, angles, times, ranges] = Scan.getValidScanData(msg);
-            for i=1:numel(ranges)
-                if ranges(i) - radius < 0.1
-                    ranges(i) = 0;
-                else
-                    ranges(i) = ranges(i) - radius;
-                end
-            end
-            [x, y] = pol2cart(angles, ranges); 
+            [frame, angles, times, ranges] = Scan.validDataEnlarged(msg, radius);
+            [x, y] = pol2cart(angles, ranges);
         end
 
     end

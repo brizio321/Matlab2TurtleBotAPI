@@ -1,6 +1,7 @@
-classdef TBBurger < Turtlebot3
-    %TBBurger Redefine Turtlebot3 abstraction. Provide a full structural
-    %description for Turtlebot3 Model Burger.
+classdef TBBurgerSim < Turtlebot3
+    %TBBurgerSim Redefine Turtlebot3 abstraction. Provide a full structural
+    %description for Turtlebot3 Model Burger. Use this class to control a
+    %simulated TurtleBot3 in a Gazebo simulation.
 
     properties(Constant, GetAccess = public)
         weight = 1           %[kg]
@@ -15,18 +16,18 @@ classdef TBBurger < Turtlebot3
         maximum_translational_velocity = 0.22   %[m/s]
         maximum_rotational_velocity = 2.84      %[rad/s]
 
-        diff2uni = [TBBurger.wheel_radius/2, TBBurger.wheel_radius/2;
-                    TBBurger.wheel_radius/TBBurger.wheel_track, ...
-                        -TBBurger.wheel_radius/TBBurger.wheel_track];
-        uni2diff = pinv(TBBurger.diff2uni);
+        diff2uni = [TBBurgerSim.wheel_radius/2, TBBurgerSim.wheel_radius/2;
+                    TBBurgerSim.wheel_radius/TBBurgerSim.wheel_track, ...
+                        -TBBurgerSim.wheel_radius/TBBurgerSim.wheel_track];
+        uni2diff = pinv(TBBurgerSim.diff2uni);
     end
 
     methods
-        function obj = TBBurger(namespace)
+        function obj = TBBurgerSim(namespace)
             arguments
                 namespace string = "";
             end
-            obj = obj@Turtlebot3(namespace);
+            obj = obj@Turtlebot3(namespace, true);
         end 
 
         function [v, w] = DDSpeed2UnicycleSpeed(wr, wl)
