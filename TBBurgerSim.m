@@ -27,8 +27,14 @@ classdef TBBurgerSim < Turtlebot3
             arguments
                 namespace string = "";
             end
-            obj = obj@Turtlebot3(namespace, true);
+            obj = obj@Turtlebot3(namespace);
         end 
+
+        function talker = createTalker(obj)
+            %createTalker Return a ROSTalker object to command and retrieve
+            %data from  Turtlebot.
+            talker = ROSTalker4Simulation(obj);
+        end
 
         function [v, w] = DDSpeed2UnicycleSpeed(wr, wl)
             %DDSpeed2UnicycleSpeed Convert right and left wheel speeds to

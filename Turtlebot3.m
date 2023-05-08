@@ -8,21 +8,18 @@ classdef (Abstract) Turtlebot3
 
     properties(SetAccess = protected)
         namespace   %Namespace specified for Turtlebot's nodes.
-        simulated
     end
 
     methods
 
-        function obj = Turtlebot3(namespace, simulated)
+        function obj = Turtlebot3(namespace)
             %Turtlebot3 Create a new Turtlebot3 object.
             %   Eventually, specify Turtlebot nodes' namespace as input
             %   parameter. Empty string is used as default namespace.
             arguments
                 namespace string = "";
-                simulated int16 = 0;
             end
             obj.namespace = namespace;
-            obj.simulated = simulated;
         end
 
         function obj = setNamespace(namespace)
@@ -31,16 +28,10 @@ classdef (Abstract) Turtlebot3
             obj.namespace = namespace;
         end
 
-        function talker = createTalker(obj)
-            %createTalker Return a ROSTalker object to command and retrieve
-            %data from  Turtlebot.
-            if obj.simulated
-                talker = ROSTalker4Simulation(obj);
-            else
-                talker = ROSTalker(obj);
-            end
-        end
+    end
 
+    methods(Abstract)
+        talker = createTalker(obj);
     end
 
 end
