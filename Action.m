@@ -6,12 +6,18 @@ classdef (Abstract) Action < handle
     % Final user has just to write algorithms to perform intended tasks
     % overriding few methods.
 
+    properties(SetAccess = private, GetAccess = private)
+        model       %Turtletbot3 object. Refere to a TBBurger or TBWafflePi object.
+        actionTimer %Timer performing control loop methods.
+    end
+
+    properties(SetAccess = private, GetAccess = protected)
+        talker      %Instance of ROSTalker to communicate with Turtlebot.
+    end
+
     properties(SetAccess = protected, GetAccess = protected)
         loopRate    %Execution rate of control loop, in Hz.
         meanPeriod  %Estimed execution period in seconds.
-        model       %Turtletbot3 object. Refere to a TBBurger or TBWafflePi object.
-        talker      %Instance of ROSTalker to communicate with Turtlebot.
-        actionTimer %Timer performing control loop methods.
     end
 
     methods(Sealed, Access = protected)
@@ -24,9 +30,11 @@ classdef (Abstract) Action < handle
             else
                 obj.stopAction();
             end
+            %if ~isnan(obj.actionTimer.AveragePeriod)
+                %obj.meanPeriod = 0.9*obj.meanPeriod + 0.1*obj.actionTimer.AveragePeriod;
+            %end
             if ~isnan(obj.actionTimer.AveragePeriod)
-                obj.meanPeriod = 0.9*obj.meanPeriod + ...
-                                 0.1*obj.actionTimer.AveragePeriod;
+                obj.meanPeriod = obj.actionTimer.AveragePeriod;
             end
         end
     end
@@ -89,7 +97,9 @@ classdef (Abstract) Action < handle
                 obj.execute();
                 
                 waitfor(r)
-                obj.meanPeriod = 0.9*obj.meanPeriod+0.1*r.LastPeriod;
+                %obj.meanPeriod = 0.9*obj.meanPeriod+0.1*r.LastPeriod;
+                stats = statistics(r);
+                obj.meanPeriod = stats.AveragePeriod;
             end
             disp('Averaged execution period: ')
             disp(obj.meanPeriod)
